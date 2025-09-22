@@ -1,7 +1,5 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import { ThemeProvider } from '@emotion/react';
-import { Box, Container, Text } from '@chakra-ui/react';
 import './globals.css';
 import ClientLayout from './ClientLayout';
 

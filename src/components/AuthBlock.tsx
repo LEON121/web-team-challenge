@@ -54,7 +54,7 @@ export default function AuthBlock() {
         login(username.trim(), jobTitle.trim());
         alert('Welcome! You can now access the application');
       }
-    } catch (error) {
+    } catch {
       alert('Failed to save your information. Please try again.');
     } finally {
       setIsSubmitting(false);

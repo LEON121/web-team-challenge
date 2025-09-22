@@ -27,9 +27,6 @@ const httpLink = createHttpLink({
  * Currently uses a public API, but can be extended for authenticated APIs
  */
 const authLink = setContext((_, { headers }) => {
-  // Get user info from localStorage for potential authentication
-  const userInfo = typeof window !== 'undefined' ? localStorage.getItem('userInfo') : null;
-  
   return {
     headers: {
       ...headers,

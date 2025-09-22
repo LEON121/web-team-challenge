@@ -104,16 +104,6 @@ export default function InformationPage() {
     });
   };
 
-  /**
-   * Get status badge based on launch success
-   * 
-   * @param {boolean | null} success - Launch success status
-   * @returns {JSX.Element} Status badge component
-   */
-  const getStatusBadge = (success: boolean | null) => {
-    if (success === null) return <Badge colorScheme="gray">Unknown</Badge>;
-    return success ? <Badge colorScheme="green">Success</Badge> : <Badge colorScheme="red">Failure</Badge>;
-  };
 
   // Show authentication block if user is not authenticated
   if (!isAuthenticated || !isUserAuthenticated()) {
