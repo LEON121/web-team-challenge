@@ -75,24 +75,44 @@ export const apolloClient = new ApolloClient({
 /**
  * Helper function to check if user is authenticated before making GraphQL requests
  * 
+ * 关键功能：验证用户是否已认证
+ * 1. 检查是否在浏览器环境（避免服务端渲染错误）
+ * 2. 检查 localStorage 中是否存在用户信息
+ * 3. 返回布尔值表示认证状态
+ * 
  * @returns {boolean} True if user is authenticated, false otherwise
  */
 export const isUserAuthenticated = (): boolean => {
+  // 关键：检查浏览器环境，避免 Next.js SSR 错误
   if (typeof window === 'undefined') return false;
+  
+  // 关键：检查 localStorage 中是否有用户信息
   return !!localStorage.getItem('userInfo');
 };
 
 /**
  * Helper function to get user information
  * 
+ * 关键功能：获取用户信息
+ * 1. 检查是否在浏览器环境（避免服务端渲染错误）
+ * 2. 从 localStorage 读取用户信息
+ * 3. 解析 JSON 数据并返回用户对象
+ * 4. 错误处理：解析失败时返回 null
+ * 
  * @returns {Object | null} User information object or null if not authenticated
  */
 export const getUserInfo = (): { username: string; jobTitle: string } | null => {
+  // 关键：检查浏览器环境，避免 Next.js SSR 错误
   if (typeof window === 'undefined') return null;
+  
   try {
+    // 关键：从 localStorage 获取用户信息
     const userInfo = localStorage.getItem('userInfo');
+    
+    // 关键：解析 JSON 字符串并返回用户对象
     return userInfo ? JSON.parse(userInfo) : null;
   } catch {
+    // 错误处理：JSON 解析失败时返回 null
     return null;
   }
 };
