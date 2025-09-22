@@ -8,8 +8,8 @@ import { setContext } from '@apollo/client/link/context';
  * proper caching and authentication context management.
  */
 
-// Public GraphQL API endpoint (using SpaceX API as an example)
-const SPACEX_GRAPHQL_API = 'https://spacex-production.up.railway.app/';
+// Public GraphQL API endpoint (using Rick and Morty API as it contains images)
+const GRAPHQL_API = 'https://rickandmortyapi.com/graphql';
 
 /**
  * HTTP link for Apollo Client
@@ -17,7 +17,7 @@ const SPACEX_GRAPHQL_API = 'https://spacex-production.up.railway.app/';
  * Configures the connection to the GraphQL API endpoint
  */
 const httpLink = createHttpLink({
-  uri: SPACEX_GRAPHQL_API,
+  uri: GRAPHQL_API,
 });
 
 /**

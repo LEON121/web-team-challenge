@@ -9,12 +9,12 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import AuthBlock from '../../components/AuthBlock';
 import { apolloClient, isUserAuthenticated } from '../../lib/apolloClient';
-import { GET_LAUNCHES, GET_LAUNCH_BY_ID, type Launch, type DetailedLaunch } from '../../lib/queries';
+import { GET_CHARACTERS, GET_CHARACTER_BY_ID, type Character, type DetailedCharacter } from '../../lib/queries';
 
 /**
  * Information page component
  * 
- * Displays SpaceX launches in a table format with modal details.
+ * Displays Rick and Morty characters in a table format with modal details.
  * Requires user authentication before showing data.
  * 
  * @returns {JSX.Element} Information page component
@@ -27,27 +27,27 @@ export default function InformationPage() {
   
   // Get page from URL or default to 1
   const page = parseInt(searchParams.get('page') || '1');
-  const limit = 10;
-  const offset = (page - 1) * limit;
 
-  const [launches, setLaunches] = useState<Launch[]>([]);
-  const [selectedLaunch, setSelectedLaunch] = useState<DetailedLaunch | null>(null);
+  const [characters, setCharacters] = useState<Character[]>([]);
+  const [selectedCharacter, setSelectedCharacter] = useState<DetailedCharacter | null>(null);
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [totalPages, setTotalPages] = useState(1);
 
   /**
-   * Fetch launches data
+   * Fetch characters data
    */
   useEffect(() => {
-    const fetchLaunches = async () => {
+    const fetchCharacters = async () => {
       try {
         setLoading(true);
-        const result = await apolloClient.query<{ launches: Launch[] }>({
-          query: GET_LAUNCHES,
-          variables: { limit, offset },
+        const result = await apolloClient.query<{ characters: { results: Character[], info: { pages: number } } }>({
+          query: GET_CHARACTERS,
+          variables: { page },
         });
-        setLaunches(result.data?.launches || []);
+        setCharacters(result.data?.characters?.results || []);
+        setTotalPages(result.data?.characters?.info?.pages || 1);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch data');
       } finally {
@@ -56,26 +56,26 @@ export default function InformationPage() {
     };
 
     if (isAuthenticated && isUserAuthenticated()) {
-      fetchLaunches();
+      fetchCharacters();
     }
-  }, [isAuthenticated, limit, offset]);
+  }, [isAuthenticated, page]);
 
   /**
-   * Fetch detailed launch information
+   * Fetch detailed character information
    * 
-   * @param {string} id - Launch ID
+   * @param {string} id - Character ID
    */
-  const fetchLaunchDetails = async (id: string) => {
+  const fetchCharacterDetails = async (id: string) => {
     try {
       setDetailLoading(true);
-      const result = await apolloClient.query<{ launch: DetailedLaunch }>({
-        query: GET_LAUNCH_BY_ID,
+      const result = await apolloClient.query<{ character: DetailedCharacter }>({
+        query: GET_CHARACTER_BY_ID,
         variables: { id },
       });
-      setSelectedLaunch(result.data?.launch || null);
+      setSelectedCharacter(result.data?.character || null);
       onOpen();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch launch details');
+      setError(err instanceof Error ? err.message : 'Failed to fetch character details');
     } finally {
       setDetailLoading(false);
     }
@@ -124,7 +124,7 @@ export default function InformationPage() {
     return (
       <Box minH="100vh" display="flex" alignItems="center" justifyContent="center">
         <Box textAlign="center">
-          <Text fontSize="xl">Loading launches...</Text>
+          <Text fontSize="xl">Loading characters...</Text>
         </Box>
       </Box>
     );
@@ -143,53 +143,61 @@ export default function InformationPage() {
   return (
     <Container maxW="container.xl" py={8}>
       <Box textAlign="center" mb={8}>
-        <Heading size="xl" mb={2}>SpaceX Launches</Heading>
-        <Text color="gray.600">Page {page} - Showing {launches.length} launches</Text>
+        <Heading size="xl" mb={2}>Rick and Morty Characters</Heading>
+        <Text color="gray.600">Page {page} - Showing {characters.length} characters</Text>
       </Box>
 
-      {/* Launches Table */}
+      {/* Characters Table */}
       <Box overflowX="auto">
         <Box as="table" width="100%" borderCollapse="collapse">
           <Box as="thead" bg="gray.100">
             <Box as="tr">
-              <Box as="th" p={4} textAlign="left">Mission Patch</Box>
-              <Box as="th" p={4} textAlign="left">Mission Name</Box>
-              <Box as="th" p={4} textAlign="left">Launch Date</Box>
-              <Box as="th" p={4} textAlign="left">Rocket</Box>
+              <Box as="th" p={4} textAlign="left">Image</Box>
+              <Box as="th" p={4} textAlign="left">Name</Box>
               <Box as="th" p={4} textAlign="left">Status</Box>
+              <Box as="th" p={4} textAlign="left">Species</Box>
+              <Box as="th" p={4} textAlign="left">Gender</Box>
+              <Box as="th" p={4} textAlign="left">Origin</Box>
               <Box as="th" p={4} textAlign="left">Actions</Box>
             </Box>
           </Box>
           <Box as="tbody">
-            {launches.map((launch) => (
+            {characters.map((character) => (
               <Box 
                 as="tr" 
-                key={launch.id} 
+                key={character.id} 
                 _hover={{ bg: 'gray.50' }}
                 borderBottom="1px solid"
                 borderColor="gray.200"
               >
                 <Box as="td" p={4}>
-                  {launch.links.mission_patch_small ? (
-                    <Image
-                      src={launch.links.mission_patch_small}
-                      alt={launch.mission_name}
-                      boxSize="50px"
-                      objectFit="contain"
-                    />
-                  ) : (
-                    <Text fontSize="sm" color="gray.500">No image</Text>
-                  )}
+                  <Image
+                    src={character.image}
+                    alt={character.name}
+                    boxSize="50px"
+                    objectFit="cover"
+                    borderRadius="md"
+                  />
                 </Box>
-                <Box as="td" p={4} fontWeight="medium">{launch.mission_name}</Box>
-                <Box as="td" p={4}>{formatDate(launch.launch_date_utc)}</Box>
-                <Box as="td" p={4}>{launch.rocket.rocket_name}</Box>
-                <Box as="td" p={4}>{getStatusBadge(launch.launch_success)}</Box>
+                <Box as="td" p={4} fontWeight="medium">{character.name}</Box>
+                <Box as="td" p={4}>
+                  <Badge 
+                    colorScheme={
+                      character.status === 'Alive' ? 'green' : 
+                      character.status === 'Dead' ? 'red' : 'gray'
+                    }
+                  >
+                    {character.status}
+                  </Badge>
+                </Box>
+                <Box as="td" p={4}>{character.species}</Box>
+                <Box as="td" p={4}>{character.gender}</Box>
+                <Box as="td" p={4}>{character.origin.name}</Box>
                 <Box as="td" p={4}>
                   <Button
                     size="sm"
                     colorScheme="blue"
-                    onClick={() => fetchLaunchDetails(launch.id)}
+                    onClick={() => fetchCharacterDetails(character.id)}
                   >
                     View Details
                   </Button>
@@ -210,9 +218,10 @@ export default function InformationPage() {
         >
           Previous
         </Button>
-        <Text>Page {page}</Text>
+        <Text>Page {page} of {totalPages}</Text>
         <Button
           onClick={() => handlePageChange(page + 1)}
+          disabled={page >= totalPages}
           colorScheme="blue"
           variant="outline"
         >
@@ -245,36 +254,38 @@ export default function InformationPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <Box display="flex" justifyContent="space-between" alignItems="center" p={4} borderBottom="1px solid" borderColor="gray.200">
-              <Heading size="lg">Launch Details</Heading>
+              <Heading size="lg">Character Details</Heading>
               <CloseButton onClick={onClose} />
             </Box>
             <Box p={4}>
               {detailLoading && <Text>Loading details...</Text>}
-              {selectedLaunch && (
+              {selectedCharacter && (
                 <Box>
-                  <Heading size="lg" mb={4}>{selectedLaunch.mission_name}</Heading>
-                  {selectedLaunch.links.mission_patch && (
-                    <Image 
-                      src={selectedLaunch.links.mission_patch} 
-                      alt={selectedLaunch.mission_name}
-                      boxSize="100px"
-                      objectFit="contain"
-                      mb={4}
-                    />
-                  )}
-                  <Text><strong>Launch Date:</strong> {formatDate(selectedLaunch.launch_date_utc)}</Text>
-                  <Text><strong>Rocket:</strong> {selectedLaunch.rocket.rocket_name} ({selectedLaunch.rocket.rocket_type})</Text>
-                  <Text><strong>Status:</strong> {getStatusBadge(selectedLaunch.launch_success)}</Text>
-                  <Text><strong>Launch Site:</strong> {selectedLaunch.launch_site.site_name_long}</Text>
-                  {selectedLaunch.details && (
-                    <Text mt={4}><strong>Details:</strong> {selectedLaunch.details}</Text>
-                  )}
-                  {selectedLaunch.links.article_link && (
-                    <Text mt={2}><a href={selectedLaunch.links.article_link} target="_blank" rel="noopener noreferrer">Article Link</a></Text>
-                  )}
-                  {selectedLaunch.links.video_link && (
-                    <Text mt={2}><a href={selectedLaunch.links.video_link} target="_blank" rel="noopener noreferrer">Video Link</a></Text>
-                  )}
+                  <Image 
+                    src={selectedCharacter.image} 
+                    alt={selectedCharacter.name}
+                    boxSize="150px"
+                    objectFit="cover"
+                    borderRadius="lg"
+                    mx="auto"
+                    mb={4}
+                  />
+                  <Heading size="lg" mb={4} textAlign="center">{selectedCharacter.name}</Heading>
+                  
+                  <Box display="grid" gridTemplateColumns="1fr 1fr" gap={4}>
+                    <Box>
+                      <Text><strong>Status:</strong> {selectedCharacter.status}</Text>
+                      <Text><strong>Species:</strong> {selectedCharacter.species}</Text>
+                      <Text><strong>Type:</strong> {selectedCharacter.type || 'Unknown'}</Text>
+                      <Text><strong>Gender:</strong> {selectedCharacter.gender}</Text>
+                    </Box>
+                    <Box>
+                      <Text><strong>Origin:</strong> {selectedCharacter.origin.name}</Text>
+                      <Text><strong>Location:</strong> {selectedCharacter.location.name}</Text>
+                      <Text><strong>Episodes:</strong> {selectedCharacter.episode.length}</Text>
+                      <Text><strong>Created:</strong> {formatDate(selectedCharacter.created)}</Text>
+                    </Box>
+                  </Box>
                 </Box>
               )}
             </Box>

@@ -3,6 +3,7 @@
 import { useAuth } from '../contexts/AuthContext';
 import AuthBlock from '../components/AuthBlock';
 import { Box, Heading, Text, VStack, Button } from '@chakra-ui/react';
+import packageJson from '../../package.json';
 
 /**
  * Home page component
@@ -64,7 +65,7 @@ export default function Home() {
 
         <Box mt={8} textAlign="center">
           <Text fontSize="sm" color="gray.500">
-            Web Team Challenge v1.0.0
+            Web Team Challenge v{packageJson.version}
           </Text>
         </Box>
       </VStack>
