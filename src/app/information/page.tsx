@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { 
   Box, Heading, Button, Text, Container, 
@@ -11,15 +11,8 @@ import AuthBlock from '../../components/AuthBlock';
 import { apolloClient, isUserAuthenticated } from '../../lib/apolloClient';
 import { GET_CHARACTERS, GET_CHARACTER_BY_ID, type Character, type DetailedCharacter } from '../../lib/queries';
 
-/**
- * Information page component
- * 
- * Displays Rick and Morty characters in a table format with modal details.
- * Requires user authentication before showing data.
- * 
- * @returns {JSX.Element} Information page component
- */
-export default function InformationPage() {
+// 包装组件以使用 Suspense
+function InformationPageContent() {
   const { isAuthenticated } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -280,6 +273,28 @@ export default function InformationPage() {
         </Box>
       )}
     </Container>
+  );
+}
+
+/**
+ * Information page component
+ * 
+ * Displays Rick and Morty characters in a table format with modal details.
+ * Requires user authentication before showing data.
+ * 
+ * @returns {JSX.Element} Information page component
+ */
+export default function InformationPage() {
+  return (
+    <Suspense fallback={
+      <Box minH="100vh" display="flex" alignItems="center" justifyContent="center">
+        <Box textAlign="center">
+          <Text fontSize="xl">Loading...</Text>
+        </Box>
+      </Box>
+    }>
+      <InformationPageContent />
+    </Suspense>
   );
 }
 

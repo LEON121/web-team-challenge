@@ -6,5 +6,10 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_CHALLENGE_VERSION: pkg.version,
   },
 };
+module.exports = {
+  experimental: {
+    missingSuspenseWithCSRBailout: false,
+  },
+}
 
 export default nextConfig;
