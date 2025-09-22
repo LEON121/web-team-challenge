@@ -203,8 +203,6 @@ export default function InformationPage() {
         <Button
           onClick={() => handlePageChange(page - 1)}
           disabled={page <= 1}
-          colorScheme="blue"
-          variant="outline"
         >
           Previous
         </Button>
@@ -212,81 +210,78 @@ export default function InformationPage() {
         <Button
           onClick={() => handlePageChange(page + 1)}
           disabled={page >= totalPages}
-          colorScheme="blue"
-          variant="outline"
         >
           Next
         </Button>
       </Box>
 
-      {/* Modal for detailed view */}
-      {open && (
+      {/* Character Details Modal */}
+      {open && selectedCharacter && (
         <Box
           position="fixed"
-          top="0"
-          left="0"
+          top={0}
+          left={0}
           width="100%"
           height="100%"
           bg="rgba(0, 0, 0, 0.5)"
           display="flex"
           alignItems="center"
           justifyContent="center"
-          zIndex="1000"
+          zIndex={1000}
           onClick={onClose}
         >
           <Box
             bg="white"
+            p={6}
             borderRadius="lg"
+            maxW="500px"
             width="90%"
-            maxW="600px"
             maxH="90vh"
             overflowY="auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <Box display="flex" justifyContent="space-between" alignItems="center" p={4} borderBottom="1px solid" borderColor="gray.200">
-              <Heading size="lg">Character Details</Heading>
-              <CloseButton onClick={onClose} />
+            <CloseButton
+              position="absolute"
+              right={4}
+              top={4}
+              onClick={onClose}
+            />
+            <Image
+              src={selectedCharacter.image}
+              alt={selectedCharacter.name}
+              width="100%"
+              height="300px"
+              objectFit="cover"
+              borderRadius="md"
+              mb={4}
+            />
+            <Heading size="lg" mb={4}>{selectedCharacter.name}</Heading>
+            <Box mb={4}>
+              <Text><strong>Status:</strong> {selectedCharacter.status}</Text>
+              <Text><strong>Species:</strong> {selectedCharacter.species}</Text>
+              <Text><strong>Gender:</strong> {selectedCharacter.gender}</Text>
+              <Text><strong>Origin:</strong> {selectedCharacter.origin.name}</Text>
+              <Text><strong>Location:</strong> {selectedCharacter.location.name}</Text>
+              <Text><strong>Created:</strong> {formatDate(selectedCharacter.created)}</Text>
             </Box>
-            <Box p={4}>
-              {detailLoading && <Text>Loading details...</Text>}
-              {selectedCharacter && (
-                <Box>
-                  <Image 
-                    src={selectedCharacter.image} 
-                    alt={selectedCharacter.name}
-                    boxSize="150px"
-                    objectFit="cover"
-                    borderRadius="lg"
-                    mx="auto"
-                    mb={4}
-                  />
-                  <Heading size="lg" mb={4} textAlign="center">{selectedCharacter.name}</Heading>
-                  
-                  <Box display="grid" gridTemplateColumns="1fr 1fr" gap={4}>
-                    <Box>
-                      <Text><strong>Status:</strong> {selectedCharacter.status}</Text>
-                      <Text><strong>Species:</strong> {selectedCharacter.species}</Text>
-                      <Text><strong>Type:</strong> {selectedCharacter.type || 'Unknown'}</Text>
-                      <Text><strong>Gender:</strong> {selectedCharacter.gender}</Text>
-                    </Box>
-                    <Box>
-                      <Text><strong>Origin:</strong> {selectedCharacter.origin.name}</Text>
-                      <Text><strong>Location:</strong> {selectedCharacter.location.name}</Text>
-                      <Text><strong>Episodes:</strong> {selectedCharacter.episode.length}</Text>
-                      <Text><strong>Created:</strong> {formatDate(selectedCharacter.created)}</Text>
-                    </Box>
-                  </Box>
+            {selectedCharacter.episode.length > 0 && (
+              <Box>
+                <Text fontWeight="bold" mb={2}>Episodes ({selectedCharacter.episode.length}):</Text>
+                <Box maxH="200px" overflowY="auto">
+                  {selectedCharacter.episode.map((ep) => (
+                    <Text key={ep.id} fontSize="sm">
+                      {ep.name} (Episode {ep.episode})
+                    </Text>
+                  ))}
                 </Box>
-              )}
-            </Box>
-            <Box display="flex" justifyContent="flex-end" p={4} borderTop="1px solid" borderColor="gray.200">
-              <Button colorScheme="blue" onClick={onClose}>
-                Close
-              </Button>
-            </Box>
+              </Box>
+            )}
           </Box>
         </Box>
       )}
     </Container>
   );
 }
+
+// 强制动态渲染，避免 useSearchParams() 在静态生成时的错误
+export const dynamic = 'force-dynamic';
